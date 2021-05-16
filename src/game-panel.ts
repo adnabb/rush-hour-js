@@ -1,21 +1,25 @@
-export default class GamePanel {
-  private width     : number
-  private height    : number
-  private gamePanel : Array<number[]>
+import {Position} from './type';
+import {Level0} from './helper/data.js';
 
-  constructor(width = 6, height = 6) {
-    this.width     = width
-    this.height    = height
-    this.gamePanel = []
+export default class GamePanel {
+  private level     : number
+  private exit      : Position   = { x: 5, y: 2 }
+  private gamePanel : number[][] = []
+
+  constructor(level = 0) {
+    this.level     = level
+    this.initGamePanel()
   }
 
   initGamePanel() : void {
-    // this.gamePanel = new Array<number>(this.height).fill(
-    //   new Array<number>(this.width).fill(0)
-    // )
+    this.gamePanel = Level0
   }
 
   getGamePanel() : number[][] {
+    return this.gamePanel
+  }
+
+  updateGamePanel() : number[][] {
     return this.gamePanel
   }
 

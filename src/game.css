@@ -1,0 +1,32 @@
+.game-board-wrapper {
+  position: relative;
+}
+
+.game-board {
+  border-spacing: 10px;
+  width: 300px;
+  height: 300px;
+}
+
+.vehicle {
+  position: absolute;
+}
+
+.vehicle.vertical {
+  transform: rotate( 90deg );
+  transform-origin: 25% 50%;
+}
+
+.vehicle.vehicle.truck {
+  transform-origin: 16% 50%;
+}
+
+.car, .bike {
+  width: 100px;
+  height: 50px;
+}
+
+.truck {
+  width: 150px;
+  height: 50px;
+}

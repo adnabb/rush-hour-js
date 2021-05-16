@@ -1,5 +1,4 @@
-type VehicleType      = 'car' | 'truck'
-type VehicleDirection = 'vertical' | 'horizontal'
+import {VehicleDirection, VehicleType} from './type'
 
 export default class Vehicle {
   private type     : VehicleType
