@@ -117,11 +117,18 @@ export default class Game {
         target.style.background = 'unset'
         const [oldX, oldY] = draggedElement.dataset.position.split(',')
         const [targetX, targetY] = target.dataset.position.split(',')
+        const isVertical = draggedElement.classList.contains('vertical')
+
+        if ( ( isVertical && targetX !== oldX ) || ( !isVertical && targetY !== oldY) ) {
+          console.error('请按照约定方向移动')
+          return
+        }
+
         const theOld: VehicleDescription = {
           value: Number(draggedElement.dataset.value),
           x    : Number(oldX),
           y    : Number(oldY),
-          direction: draggedElement.classList.contains('vertical') ? 'vertical' : 'horizonal',
+          direction: isVertical ? 'vertical' : 'horizonal',
           length   : draggedElement.classList.contains('truck') ? 3 : 2
         }
 
@@ -130,18 +137,47 @@ export default class Game {
           y: Number(targetY),
         })
         const theNewPosition: Position = this.getTheNewPositionByMovement(theOld, movement)
-
-        console.log('temp', theNewPosition)
-        this.gamePanel.updateGamePanelValue(theOld, {
+        const theNew: VehicleDescription = {
           ...theOld,
           ...theNewPosition,
-        })
+        }
+
+        if(!this.checkMovement(theOld, movement)) {
+          console.error('只能在空地处移动')
+          return
+        }
+
+        console.log('temp', theNewPosition)
+        console.log('movement', movement)
+        this.gamePanel.updateGamePanelValue(theOld, theNew)
         this.moveVehicle(draggedElement, movement)
+        draggedElement.dataset.position = `${theNew.x},${theNew.y}`
         console.log('theNew', this.gamePanel.getGamePanel())
 
       }
 
     })
+  }
+
+  checkMovement(theOld: VehicleDescription, movement: number) : boolean {
+    let result: boolean = true
+    const gamePanel: number[][] = this.gamePanel.getGamePanel()
+    const isVertical: boolean = theOld.direction === 'vertical'
+
+    for (let i = 0; i < theOld.length; i++) {
+      if (isVertical && [theOld.value, 0].indexOf(gamePanel[theOld.y + i + movement][theOld.x]) === -1) {
+        result = false
+      }
+
+
+      console.log('validate', gamePanel[theOld.y][theOld.x + i + movement])
+
+      if (!isVertical && [theOld.value, 0].indexOf(gamePanel[theOld.y][theOld.x + i + movement]) === -1) {
+        result = false
+      }
+    }
+
+    return result
   }
 
   moveVehicle(vehicle: HTMLImageElement, movement: number) : void {

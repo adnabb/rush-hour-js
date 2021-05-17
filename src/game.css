@@ -8,6 +8,10 @@
   height: 300px;
 }
 
+.game-board tr:nth-child(3) td:last-child {
+  background: greenyellow;
+}
+
 .vehicle {
   position: absolute;
 }
