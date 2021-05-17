@@ -24,6 +24,11 @@
 .car, .bike {
   width: 100px;
   height: 50px;
+  box-sizing: border-box;
+}
+
+.car {
+  padding: 0px 8px;
 }
 
 .truck {

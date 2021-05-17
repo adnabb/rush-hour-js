@@ -1,8 +1,10 @@
 const gulp = require("gulp")
 const ts   = require("gulp-typescript")
 
-const tsProject = ts.createProject("tsconfig.json")
+exports.default = gulp.series(build)
+exports.dev     = gulp.watch('src/**/*.ts', {}, build)
 
-gulp.task('default', function () {
+function build() {
+  const tsProject = ts.createProject("tsconfig.json")
   return tsProject.src().pipe(tsProject()).js.pipe(gulp.dest('dist'))
-})
+}
