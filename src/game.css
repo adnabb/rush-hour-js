@@ -9,7 +9,7 @@
 }
 
 .game-board tr:nth-child(3) td:last-child {
-  background: greenyellow;
+  background: greenyellow !important;
 }
 
 .vehicle {
@@ -32,7 +32,7 @@
 }
 
 .car {
-  padding: 0px 8px;
+  padding: 0 8px;
 }
 
 .truck {

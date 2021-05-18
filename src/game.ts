@@ -1,14 +1,35 @@
 import GamePanel from "./game-panel.js"
-import {VehicleDescription, Position, VehicleDirection} from './type'
+import {VehicleDescription, Position} from './type'
 import parseVehicle from './helper/parse-vehicle.js'
+import dragEvent from "./helper/drag-event.js"
 
 export default class Game {
   private level    : number
   private gamePanel: GamePanel
+  private draggedElement: EventTarget & HTMLImageElement = null
+
+  private onDrag: () => void
+  private onDragStart: () => void
+  private onDragOver : () => void
+  private onDragLeave: () => void
+  private onDragEnter: () => void
+  private onDragDrop : () => void
+  private onDragEnd  : () => void
 
   constructor(level = 0) {
     this.level     = level
     this.gamePanel = new GamePanel(level)
+    this.onDrag      = dragEvent.onDrag.bind(this)
+    this.onDragStart = dragEvent.onDragStart.bind(this)
+    this.onDragOver  = dragEvent.onDragOver.bind(this)
+    this.onDragLeave = dragEvent.onDragLeave.bind(this)
+    this.onDragEnter = dragEvent.onDragEnter.bind(this)
+    this.onDragDrop  = dragEvent.onDragDrop.bind(this)
+    this.onDragEnd   = dragEvent.onDragEnd.bind(this)
+  }
+
+  getDragElement() : EventTarget & HTMLImageElement {
+    return this.draggedElement
   }
 
   updateLevel(level: number) {
@@ -53,7 +74,8 @@ export default class Game {
 
   getVehicleDoms() : HTMLImageElement[] {
     const vehicles: VehicleDescription[] = parseVehicle(this.getConfig())
-    const svgDoms = vehicles.map((vehicle) => {
+
+    return vehicles.map((vehicle) => {
       const vehicleType: string = vehicle.value === -1 ? 'bike' : (
           vehicle.length === 2 ? 'car' : 'truck'
       )
@@ -71,92 +93,42 @@ export default class Game {
       return img
     })
 
-
-    return svgDoms
   }
 
+
+
   addEventListenerToVehicle() {
-    let draggedElement: HTMLImageElement
 
-    document.addEventListener('drag', (event) => {
-    }, false)
+    document.addEventListener('drag', this.onDrag, false)
 
-    document.addEventListener('dragstart', (event) => {
-      draggedElement = event.target as HTMLImageElement
-      draggedElement.style.opacity = '.5'
-    }, false)
+    document.addEventListener('dragstart', this.onDragStart, false)
 
-    document.addEventListener("dragend", (event) => {
-      draggedElement.style.opacity = 'unset'
-    })
+    document.addEventListener("dragend", this.onDragEnd)
 
-    document.addEventListener('dragover', (event) => {
-      event.preventDefault()
-    })
+    document.addEventListener('dragover', this.onDragOver)
 
-    document.addEventListener('dragenter', (event) => {
-      const target = event.target as HTMLTableDataCellElement
-      if (target.nodeName === 'TD') {
-        target.style.background = 'purple'
-      }
-    })
+    document.addEventListener('dragenter', this.onDragEnter)
 
-    document.addEventListener('dragleave', (event) => {
-      const target = event.target as HTMLTableDataCellElement
-      if (target.nodeName === 'TD') {
-        target.style.background = 'unset'
-      }
-    })
+    document.addEventListener('dragleave', this.onDragLeave)
 
-    document.addEventListener('drop', (event) => {
-      event.preventDefault()
+    document.addEventListener('drop', this.onDragDrop)
+  }
 
-      const target = event.target as HTMLTableDataCellElement & DragEvent
+  removeListenerToVehicle() {
 
-      if (target.nodeName === 'TD') {
-        target.style.background = 'unset'
-        const [oldX, oldY] = draggedElement.dataset.position.split(',')
-        const [targetX, targetY] = target.dataset.position.split(',')
-        const isVertical = draggedElement.classList.contains('vertical')
+    document.removeEventListener('drag', this.onDrag, false)
 
-        if ( ( isVertical && targetX !== oldX ) || ( !isVertical && targetY !== oldY) ) {
-          console.error('请按照约定方向移动')
-          return
-        }
+    document.removeEventListener('dragstart', this.onDragStart, false)
 
-        const theOld: VehicleDescription = {
-          value: Number(draggedElement.dataset.value),
-          x    : Number(oldX),
-          y    : Number(oldY),
-          direction: isVertical ? 'vertical' : 'horizonal',
-          length   : draggedElement.classList.contains('truck') ? 3 : 2
-        }
+    document.removeEventListener("dragend", this.onDragEnd)
 
-        const movement: number = this.getVehicleMovement(theOld, {
-          x: Number(targetX),
-          y: Number(targetY),
-        })
-        const theNewPosition: Position = this.getTheNewPositionByMovement(theOld, movement)
-        const theNew: VehicleDescription = {
-          ...theOld,
-          ...theNewPosition,
-        }
+    document.removeEventListener('dragover', this.onDragOver)
 
-        if(!this.checkMovement(theOld, movement)) {
-          console.error('只能在空地处移动')
-          return
-        }
+    document.removeEventListener('dragenter', this.onDragEnter)
 
-        console.log('temp', theNewPosition)
-        console.log('movement', movement)
-        this.gamePanel.updateGamePanelValue(theOld, theNew)
-        this.moveVehicle(draggedElement, movement)
-        draggedElement.dataset.position = `${theNew.x},${theNew.y}`
-        console.log('theNew', this.gamePanel.getGamePanel())
+    document.removeEventListener('dragleave', this.onDragLeave)
 
-      }
-
-    })
+    document.removeEventListener('drop', this.onDragDrop)
   }
 
   checkMovement(theOld: VehicleDescription, movement: number) : boolean {

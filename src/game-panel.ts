@@ -11,6 +11,10 @@ export default class GamePanel {
     this.initGamePanel()
   }
 
+  getExitPosition() : Position {
+    return this.exit
+  }
+
   updateLevel(level: number) : void {
     this.level = level
   }
